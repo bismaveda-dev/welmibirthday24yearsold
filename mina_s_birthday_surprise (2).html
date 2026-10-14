@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDA | Mina</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for UI, Permanent Marker for Hero -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Canvas Confetti for Birthday Effect -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        marker: ['"Permanent Marker"', 'cursive'],
+                    },
+                    colors: {
+                        brand: '#000000',
+                        accent: '#e31837', // Alexzono style red
+                        'brand-blue': '#0055a4', // Alexzono blue
+                        'brand-yellow': '#fff200', // Alexzono yellow
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #111;
+            overflow-x: hidden;
+        }
+        
+        .blur-active {
+            filter: blur(12px) grayscale(20%);
+            pointer-events: none;
+            user-select: none;
+            transition: filter 1s ease-in-out;
+        }
+
+        .blur-removed {
+            filter: blur(0px) grayscale(0%);
+            pointer-events: auto;
+            transition: filter 1.5s ease-in-out;
+        }
+
+        /* Paywall Glass Effect */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        /* Shake animation for wrong password */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .shake-animation {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Product image interactions */
+        .img-container {
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .img-container img {
+            transition: transform 0.4s ease;
+            mix-blend-mode: multiply; /* Removes white background from jpegs */
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        
+        /* The Selection Glow Effect */
+        .selected-glow .img-container {
+            outline: 4px solid #fff200;
+            box-shadow: 0 0 20px rgba(255, 242, 0, 0.8);
+            transform: translateY(-5px);
+            background-color: #fffde6; /* light yellow tint */
+        }
+        .selected-glow img {
+            transform: scale(1.05);
+        }
+
+        /* Hover effect for unselected items */
+        .group:not(.selected-glow):hover .img-container {
+            border-color: #000;
+            transform: translateY(-3px);
+        }
+
+        /* Fade and slide animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Alexzono aesthetic specific tweaks */
+        .highlight-title {
+            background-color: #fff200;
+            display: inline-block;
+            padding: 2px 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 11px;
+            color: black;
+        }
+        
+        .product-title {
+            color: #0055a4;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        .recommendation-tag {
+            background-color: #000;
+            color: #fff200;
+            font-size: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 4px 8px;
+            margin-top: 8px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Birthday Vibe Animations */
+        @keyframes rainbowBorder {
+            0% { border-color: #fff200; }
+            33% { border-color: #e31837; }
+            66% { border-color: #0055a4; }
+            100% { border-color: #fff200; }
+        }
+        
+        .birthday-glow {
+            animation: rainbowBorder 3s linear infinite;
+            box-shadow: 0 0 40px rgba(227, 24, 55, 0.4), 0 0 80px rgba(255, 242, 0, 0.3);
+        }
+
+        @keyframes bounce-slight {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        
+        .animate-bounce-slight {
+            animation: bounce-slight 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased font-sans flex flex-col min-h-screen">
+
+    <div id="paywall-overlay" class="fixed inset-0 z-[100] flex items-center justify-center glass-panel transition-opacity duration-1000">
+        <div class="max-w-md w-full p-8 text-center bg-white border border-gray-100 shadow-2xl rounded-3xl mx-4">
+            <div class="mb-6 flex justify-center">
+                <i class="ph-fill ph-lock-key text-5xl text-black"></i>
+            </div>
+            <h2 class="text-3xl font-black mb-2 tracking-tighter uppercase">Exclusive Access</h2>
+            <p class="text-gray-500 mb-8 text-sm font-medium">Please verify your identity to proceed.</p>
+            
+            <div class="space-y-4">
+                <label class="block text-sm font-bold text-left text-gray-800 uppercase tracking-wide">What is your name by nickname?</label>
+                <input type="text" id="password-input" class="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-black focus:ring-0 transition-all text-lg font-semibold placeholder:font-normal" placeholder="Enter nickname..." autocomplete="off">
+                
+                <p id="error-message" class="text-accent text-sm hidden font-bold text-left uppercase tracking-wide">Incorrect. Try again.</p>
+                <p id="clue-message" class="text-brand-blue text-sm hidden font-semibold text-left transition-opacity duration-500">* Clue: Nickname he used to call you in your first chat.</p>
+                
+                <button onclick="checkPassword()" class="w-full bg-black text-white font-black uppercase tracking-widest py-4 rounded-xl hover:bg-accent transition-colors mt-4 shadow-lg">
+                    Unlock Closet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEARCH TWIST BANNER -->
+    <div id="search-banner" class="fixed top-0 left-0 w-full bg-brand-yellow z-[60] transform -translate-y-full transition-transform duration-500 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <p class="text-black font-black uppercase tracking-widest text-xs md:text-sm text-center w-full">
+                you don't need to search anything, all the answer are within yourself ✨
+            </p>
+            <button onclick="closeBanner('search-banner')" class="text-black hover:text-red-600 font-bold ml-4">
+                <i class="ph ph-x text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- WRONG OUTFIT ERROR BANNER -->
+    <div id="error-banner" class="fixed top-0 left-0 w-full bg-accent z-[60] transform -translate-y-full transition-transform duration-500 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <p class="text-white font-black uppercase tracking-widest text-xs md:text-sm text-center w-full">
+                PLEASE FOR ONCE, CONSIDER MY RECOMMENDATION 😭
+            </p>
+            <button onclick="closeBanner('error-banner')" class="text-white hover:text-black font-bold ml-4">
+                <i class="ph ph-x text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="main-content" class="blur-active flex-grow flex flex-col relative z-40">
+        
+        <!-- TOP NAVIGATION -->
+        <nav class="w-full bg-white text-[10px] md:text-xs font-black tracking-[0.2em] uppercase py-5 px-6 flex justify-between items-center sticky top-0 z-50 border-b border-gray-100">
+            <!-- Left -->
+            <div class="flex space-x-6 w-1/3">
+                <a href="#" class="text-black hover:text-accent transition-colors">HOME</a>
+                <a href="#" class="text-gray-400 hover:text-black transition-colors">CLOSET</a>
+            </div>
+            <!-- Middle -->
+            <div class="w-1/3 text-center text-[10px] md:text-sm tracking-widest text-black">
+                WOYWELMI x ARMED DETECTIVE
+            </div>
+            <!-- Right -->
+            <div class="flex space-x-6 w-1/3 justify-end">
+                <button onclick="triggerBanner('search-banner')" class="text-gray-400 hover:text-black transition-colors uppercase font-black tracking-[0.2em]">SEARCH</button>
+            </div>
+        </nav>
+
+        <main class="flex-grow w-full flex flex-col items-center pb-10">
+            
+            <!-- Hero Banner (Forest) -->
+            <div class="w-full h-[30vh] sm:h-[40vh] relative flex items-center justify-center overflow-hidden mb-12">
+                <img src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=2074&auto=format&fit=crop" alt="Forest" class="absolute inset-0 w-full h-full object-cover">
+                <div class="absolute inset-0 bg-white/60 mix-blend-overlay"></div>
+                
+                <!-- Updated Playful Logo Overlay -->
+                <div class="relative z-10 text-center flex flex-col items-center mt-4">
+                    <h1 class="font-marker text-4xl md:text-6xl text-brand-blue drop-shadow-md tracking-wider transform -rotate-2">WOYWELMI BIRTHDAY</h1>
+                    <h2 class="font-marker text-3xl md:text-5xl text-accent drop-shadow-md tracking-widest mt-0 transform rotate-1">TRAIL CLOSET</h2>
+                </div>
+            </div>
+
+            <!-- Virtual Closet Intro -->
+            <div class="max-w-2xl text-center px-6 mb-12">
+                <p class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Build Your Outfit</p>
+                <p class="text-xs text-gray-400 font-medium">Click to select one item from each category. Can you guess what I bought you?</p>
+            </div>
+
+            <!-- Wardrobe Container -->
+            <div class="max-w-[1000px] w-full px-6">
+                <div id="wardrobe-categories-container" class="space-y-20">
+                    <!-- Categories injected by JS -->
+                </div>
+            </div>
+            
+            <!-- PREVIEW OUTLOOK BUTTON -->
+            <div class="mt-20 mb-10">
+                <button onclick="checkOutlook()" class="bg-brand-blue text-white text-lg md:text-xl font-black uppercase tracking-[0.2em] py-5 px-12 rounded-xl shadow-[6px_6px_0px_0px_rgba(255,242,0,1)] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(255,242,0,1)] transition-all border-2 border-black">
+                    Preview Outlook
+                </button>
+            </div>
+        </main>
+
+        <!-- BOTTOM NAVIGATION / FOOTER -->
+        <footer class="bg-accent text-white py-12 mt-auto w-full">
+            <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-6">
+                <div class="flex flex-wrap justify-center gap-8 md:gap-16 text-[10px] font-black uppercase tracking-[0.2em]">
+                    <a href="https://wa.me/6288219598306" target="_blank" class="hover:text-brand-yellow transition-colors">COMPLAINT</a>
+                    <button onclick="openContactModal()" class="hover:text-brand-yellow transition-colors uppercase font-black tracking-[0.2em]">CONTACT</button>
+                    <button onclick="openTermsModal()" class="hover:text-brand-yellow transition-colors uppercase font-black tracking-[0.2em]">TERMS</button>
+                </div>
+                <div class="border-t border-white/20 w-full max-w-[200px] my-2"></div>
+                <p class="text-[9px] font-bold tracking-widest uppercase opacity-70">&copy; 2026 Stray Dogs Athletics.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- PREVIEW OUTLOOK MODAL (THE BIG SURPRISE) -->
+    <div id="outlook-modal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity duration-300 opacity-0">
+        <div id="outlook-content-box" class="bg-white border-4 border-brand-yellow rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col transform scale-95 transition-transform duration-300 relative birthday-glow">
+            
+            <button onclick="closeModal('outlook-modal')" class="absolute top-4 right-4 z-20 p-2 bg-white border-2 border-black rounded-full text-black hover:bg-brand-yellow transition-colors shadow-md">
+                <i class="ph ph-x text-xl font-bold"></i>
+            </button>
+
+            <!-- Header -->
+            <div class="bg-brand-blue text-white p-6 text-center z-10 border-b-4 border-black">
+                <h2 class="text-3xl font-marker tracking-widest animate-bounce-slight inline-block drop-shadow-lg">HAPPY BIRTHDAY SA MINA MINA EE! 🎂</h2>
+                <p class="text-xs font-bold uppercase tracking-widest mt-2 text-brand-yellow">Your Official Birthday Trail Fit</p>
+            </div>
+
+            <!-- Image Viewer -->
+            <div class="flex-grow relative bg-gray-100 flex items-center justify-center overflow-hidden p-4">
+                <img id="outfit-image" src="FOLDER IMAGES/Gemini_Generated_Image_hgs99ahgs99ahgs9.jpg" alt="Outfit Front" class="max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-xl transition-opacity duration-300" onerror="this.src='https://placehold.co/800x1200/f8f9fa/0055a4?text=Front+View+Image'">
+            </div>
+
+            <!-- Controls -->
+            <div class="bg-white p-6 border-t-2 border-black flex flex-col items-center">
+                <p class="text-sm font-bold text-center mb-4 uppercase tracking-widest">Toggle View</p>
+                <div class="flex gap-4">
+                    <button onclick="switchOutfitView('front')" id="btn-front" class="bg-black text-white px-6 py-3 rounded-lg font-black uppercase tracking-widest text-xs border-2 border-black hover:bg-brand-yellow hover:text-black transition-colors">
+                        Front Side
+                    </button>
+                    <button onclick="switchOutfitView('back')" id="btn-back" class="bg-white text-black px-6 py-3 rounded-lg font-black uppercase tracking-widest text-xs border-2 border-black hover:bg-brand-yellow transition-colors">
+                        Back Side
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTACT MODAL -->
+    <div id="contact-modal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+        <div class="bg-white border-2 border-black rounded-2xl shadow-[8px_8px_0px_0px_rgba(227,24,55,1)] w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 p-8 relative">
+            <button onclick="closeModal('contact-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+                <i class="ph ph-x text-xl font-bold"></i>
+            </button>
+            <h2 class="text-2xl font-black uppercase tracking-tighter border-b-2 border-black pb-4 mb-6">Contact Us</h2>
+            <div class="space-y-6">
+                <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <div class="w-12 h-12 rounded-full bg-brand-blue flex items-center justify-center text-white font-bold text-xl">B</div>
+                    <div>
+                        <h3 class="font-black uppercase text-sm">Bisma</h3>
+                        <p class="text-xs text-gray-500 font-medium">Supreme Owner / Boyfriend</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <div class="w-12 h-12 rounded-full bg-brand-yellow flex items-center justify-center text-black font-bold text-xl">B</div>
+                    <div>
+                        <h3 class="font-black uppercase text-sm">Beby</h3>
+                        <p class="text-xs text-gray-500 font-medium">Accomplice / Secret Agent</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERMS MODAL -->
+    <div id="terms-modal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+        <div class="bg-white border-2 border-black rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,85,164,1)] w-full max-w-lg max-h-[80vh] flex flex-col transform scale-95 transition-transform duration-300 relative">
+            <div class="p-6 border-b-2 border-black flex justify-between items-center">
+                <h2 class="text-xl font-black uppercase tracking-tighter">Terms & Conditions</h2>
+                <button onclick="closeModal('terms-modal')" class="text-gray-400 hover:text-black transition-colors">
+                    <i class="ph ph-x text-xl font-bold"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 text-sm font-medium text-gray-700">
+                <p>By accessing this Birthday Surprise, you agree to the following legally binding (but mostly silly) conditions:</p>
+                <ol class="list-decimal pl-5 space-y-3">
+                    <li><strong class="text-black">No Returns:</strong> All gifts and surprises are final. Returns, refunds, or exchanges are strictly prohibited unless explicitly negotiated with the Supreme Owner of the Website, <strong>BISMA</strong>.</li>
+                    <li><strong class="text-black">Strict Exchange Policy:</strong> If an exchange is granted by BISMA, it will require a payment of extra hugs, cuddles, and potentially buying him iced coffee.</li>
+                    <li><strong class="text-black">Mandatory Usage:</strong> The recipient (Mina) is required to wear the gifted items on future trail runs, hikes, or adventures with the Owner.</li>
+                    <li><strong class="text-black">Complaint Department:</strong> Any complaints about these terms can be directed to the "COMPLAINT" button, which definitely goes to a real customer service rep and not just Bisma's WhatsApp.</li>
+                    <li><strong class="text-black">Joy Clause:</strong> You are contractually obligated to have the happiest birthday ever.</li>
+                </ol>
+            </div>
+            <div class="p-6 border-t-2 border-black bg-gray-50 rounded-b-xl">
+                <button onclick="closeModal('terms-modal')" class="w-full bg-black text-white font-black py-3 rounded-lg uppercase tracking-widest hover:bg-accent transition-colors">I Accept</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO ELEMENTS -->
+    <!-- Put your downloaded mp3s in the same folder as this HTML file -->
+    <audio id="bgm-default" loop>
+        <source src="Luck_Life.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bgm-surprise" loop>
+        <source src="Shakira_Saminamina.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // --- PAYWALL LOGIC ---
+        let attempts = 0;
+        const correctPassword = "mina";
+
+        const inputField = document.getElementById('password-input');
+        inputField.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        function checkPassword() {
+            const input = inputField.value.trim().toLowerCase();
+            const errorMsg = document.getElementById('error-message');
+            const clueMsg = document.getElementById('clue-message');
+            const paywallContent = document.querySelector('#paywall-overlay > div');
+
+            if (input === correctPassword) {
+                unlockSite();
+            } else {
+                attempts++;
+                
+                paywallContent.classList.remove('shake-animation');
+                void paywallContent.offsetWidth; // trigger reflow
+                paywallContent.classList.add('shake-animation');
+                
+                errorMsg.classList.remove('hidden');
+                inputField.value = ""; 
+                
+                if (attempts >= 10) {
+                    clueMsg.classList.remove('hidden');
+                    clueMsg.classList.add('fade-in');
+                }
+            }
+        }
+
+        function unlockSite() {
+            const overlay = document.getElementById('paywall-overlay');
+            const mainContent = document.getElementById('main-content');
+            
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 1000);
+
+            mainContent.classList.remove('blur-active');
+            mainContent.classList.add('blur-removed');
+            
+            renderWardrobe();
+
+            // Play BGM 1 (Luck Life)
+            const bgmDefault = document.getElementById('bgm-default');
+            bgmDefault.volume = 0.5; // Set volume to 50%
+            bgmDefault.play().catch(e => console.log("Audio autoplay prevented by browser. User needs to interact more."));
+        }
+
+        // --- BANNER UTILS ---
+        function triggerBanner(id) {
+            const banner = document.getElementById(id);
+            banner.classList.remove('-translate-y-full');
+            
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                closeBanner(id);
+            }, 5000);
+        }
+
+        function closeBanner(id) {
+            const banner = document.getElementById(id);
+            banner.classList.add('-translate-y-full');
+        }
+
+        // --- MODAL UTILS ---
+        function openModalById(id) {
+            const el = document.getElementById(id);
+            const box = el.querySelector('div');
+            el.classList.remove('hidden');
+            setTimeout(() => {
+                el.classList.remove('opacity-0');
+                if(box) box.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            const box = el.querySelector('div');
+            el.classList.add('opacity-0');
+            if(box) box.classList.add('scale-95');
+            
+            setTimeout(() => {
+                el.classList.add('hidden');
+            }, 300);
+        }
+
+        function openContactModal() { openModalById('contact-modal'); }
+        function openTermsModal() { openModalById('terms-modal'); }
+
+        // --- STATE MANAGEMENT ---
+        let currentSelections = {
+            'joggers': null,
+            'tops': null,
+            'bottoms': null,
+            'hats': null,
+            'sunglasses': null,
+            'vest': null
+        };
+
+        // --- WARDROBE DATA ---
+        const wardrobeData = [
+            {
+                categoryId: "joggers",
+                sectionTitle: "Trail Joggers",
+                items: [
+                    {
+                        id: 'jog-1', name: 'New Balance Cream Womens Fresh Foam X Hierro v9 Trainers',
+                        thumb: 'FOLDER IMAGES/trail joggers/New Balance Cream Womens Fresh Foam X Hierro v9 Trainers.webp',
+                        isRecommended: true
+                    }
+                ]
+            },
+            {
+                categoryId: "tops",
+                sectionTitle: "Tops",
+                items: [
+                    {
+                        id: 'top-1', name: 'Gumi Racing Longsleeve White Purple',
+                        thumb: 'FOLDER IMAGES/tops/Gumi Racing Longsleeve White Purple.jpg',
+                        isRecommended: false
+                    },
+                    {
+                        id: 'top-2', name: 'Parc x Walkers Prime Tank Black',
+                        thumb: 'FOLDER IMAGES/tops/Parc x Walkers Prime Tank Black.jpg',
+                        isRecommended: true
+                    },
+                    {
+                        id: 'top-3', name: 'Gumi Racing Short Sleeve White',
+                        thumb: 'FOLDER IMAGES/tops/Gumi Racing Short Sleeve White.jpg',
+                        isRecommended: false
+                    }
+                ]
+            },
+            {
+                categoryId: "bottoms",
+                sectionTitle: "Bottoms",
+                items: [
+                    {
+                        id: 'bot-1', name: 'Anya Active 42 Compression Shorts in Black Sesame',
+                        thumb: 'FOLDER IMAGES/bottoms/Anya Active 42 Compression Shorts in Black Sesame.jpg',
+                        isRecommended: true
+                    },
+                    {
+                        id: 'bot-2', name: 'Kniel Performance Tights Army',
+                        thumb: 'FOLDER IMAGES/bottoms/Kniel Performance Tights Army.jpg',
+                        isRecommended: false
+                    },
+                    {
+                        id: 'bot-3', name: 'VoltandFast Blue Tight x Pocari',
+                        thumb: 'FOLDER IMAGES/bottoms/VoltandFast Blue Tight x Pocari.jpg',
+                        isRecommended: false
+                    }
+                ]
+            },
+            {
+                categoryId: "hats",
+                sectionTitle: "Hats",
+                items: [
+                    {
+                        id: 'hat-1', name: 'Bandana Shopee',
+                        thumb: 'FOLDER IMAGES/hats/Bandana Shopee.jpg',
+                        isRecommended: true
+                    },
+                    {
+                        id: 'hat-2', name: 'Gumi Trucker Cap',
+                        thumb: 'FOLDER IMAGES/hats/Gumi Trucker Cap.jpg',
+                        isRecommended: false
+                    }
+                ]
+            },
+            {
+                categoryId: "sunglasses",
+                sectionTitle: "Sunglasses",
+                items: [
+                    {
+                        id: 'sun-1', name: 'UNKNOWN White Running Shades',
+                        thumb: 'FOLDER IMAGES/sunglasses/UNKNOWN White Running Shades.jpg',
+                        isRecommended: true
+                    }
+                ]
+            },
+            {
+                categoryId: "vest",
+                sectionTitle: "Trail Vest",
+                items: [
+                    {
+                        id: 'vest-1', name: 'Salomon ADV SKIN 12 Nautical Blue',
+                        thumb: 'FOLDER IMAGES/trail vest/Salomon ADV SKIN 12 Nautical Blue.webp',
+                        isRecommended: true
+                    },
+                    {
+                        id: 'vest-2', name: 'Monte Trail Vest Colorful',
+                        thumb: 'FOLDER IMAGES/trail vest/Monte Trail Vest Colorful.jpg',
+                        isRecommended: false
+                    }
+                ]
+            }
+        ];
+
+        // --- RENDERING WARDROBE ---
+        function renderWardrobe() {
+            const container = document.getElementById('wardrobe-categories-container');
+            container.innerHTML = ''; 
+
+            wardrobeData.forEach(section => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'fade-in flex flex-col w-full items-center';
+                
+                // Yellow Highlight Title
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'w-full mb-8 text-center';
+                titleDiv.innerHTML = `
+                    <h3 class="highlight-title text-center">
+                        ${section.sectionTitle}
+                    </h3>
+                `;
+                
+                // Grid setup
+                const gridDiv = document.createElement('div');
+                gridDiv.className = `w-full flex flex-wrap justify-center gap-6 md:gap-10`;
+
+                section.items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = `group cursor-pointer flex flex-col items-center max-w-[200px] w-full p-2 rounded-xl transition-all cat-${section.categoryId}`;
+                    card.id = `item-${item.id}`;
+                    
+                    card.onclick = function() {
+                        selectItem(section.categoryId, item.id);
+                    };
+
+                    // Recommendation badge html
+                    let tagHtml = item.isRecommended 
+                        ? `<div class="recommendation-tag">Recommendation<br>by the owner</div>` 
+                        : `<div class="h-[28px] mt-2"></div>`; 
+
+                    card.innerHTML = `
+                        <div class="img-container w-full aspect-square relative p-2 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
+                            <img src="${encodeURI(item.thumb)}" alt="${item.name}" onerror="this.src='https://placehold.co/600x800/f8f9fa/0055a4?text=${encodeURIComponent(item.name)}'">
+                        </div>
+                        <div class="flex flex-col items-center px-2 w-full">
+                            ${tagHtml}
+                            <h3 class="product-title">${item.name}</h3>
+                        </div>
+                    `;
+                    gridDiv.appendChild(card);
+                });
+
+                sectionDiv.appendChild(titleDiv);
+                sectionDiv.appendChild(gridDiv);
+                container.appendChild(sectionDiv);
+            });
+        }
+
+        // --- SELECTION LOGIC ---
+        function selectItem(categoryId, itemId) {
+            currentSelections[categoryId] = itemId;
+
+            const allCategoryElements = document.querySelectorAll(`.cat-${categoryId}`);
+            allCategoryElements.forEach(el => {
+                el.classList.remove('selected-glow');
+            });
+
+            const clickedElement = document.getElementById(`item-${itemId}`);
+            if (clickedElement) {
+                clickedElement.classList.add('selected-glow');
+            }
+        }
+
+        // --- VALIDATION & OUTLOOK LOGIC ---
+        function checkOutlook() {
+            const correctAnswers = {
+                'joggers': 'jog-1',
+                'tops': 'top-2',
+                'bottoms': 'bot-1',
+                'hats': 'hat-1',
+                'sunglasses': 'sun-1',
+                'vest': 'vest-1'
+            };
+
+            let allCorrect = true;
+            let allSelected = true;
+
+            for (let category in correctAnswers) {
+                if (!currentSelections[category]) {
+                    allSelected = false;
+                    allCorrect = false;
+                } else if (currentSelections[category] !== correctAnswers[category]) {
+                    allCorrect = false;
+                }
+            }
+
+            if (!allSelected) {
+                alert("Please select one item from every category first!");
+                return;
+            }
+
+            if (allCorrect) {
+                // MUSIC SWITCH LOGIC
+                const bgmDefault = document.getElementById('bgm-default');
+                const bgmSurprise = document.getElementById('bgm-surprise');
+                
+                bgmDefault.pause(); // Stop Luck Life
+                bgmSurprise.volume = 0.7; 
+                bgmSurprise.play().catch(e => console.log("Audio autoplay prevented.")); // Start Shakira
+
+                // Open the final preview modal
+                openModalById('outlook-modal');
+                switchOutfitView('front');
+                
+                // Trigger the confetti!
+                fireConfetti();
+            } else {
+                triggerBanner('error-banner');
+            }
+        }
+
+        // --- CONFETTI LOGIC ---
+        function fireConfetti() {
+            var duration = 5 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 99999 };
+
+            function randomInRange(min, max) {
+              return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+              var timeLeft = animationEnd - Date.now();
+
+              if (timeLeft <= 0) {
+                return clearInterval(interval);
+              }
+
+              var particleCount = 50 * (timeLeft / duration);
+              // Fire from left and right edges
+              confetti(Object.assign({}, defaults, { particleCount,
+                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+              }));
+              confetti(Object.assign({}, defaults, { particleCount,
+                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+              }));
+            }, 250);
+        }
+
+        // --- OUTFIT IMAGE SLIDER ---
+        function switchOutfitView(side) {
+            const img = document.getElementById('outfit-image');
+            const btnFront = document.getElementById('btn-front');
+            const btnBack = document.getElementById('btn-back');
+
+            img.style.opacity = '0.5';
+
+            setTimeout(() => {
+                if (side === 'front') {
+                    img.src = 'FOLDER IMAGES/Gemini_Generated_Image_hgs99ahgs99ahgs9.jpg';
+                    btnFront.className = "bg-black text-white px-6 py-3 rounded-lg font-black uppercase tracking-widest text-xs border-2 border-black transition-colors";
+                    btnBack.className = "bg-white text-black px-6 py-3 rounded-lg font-black uppercase tracking-widest text-xs border-2 border-black hover:bg-gray-100 transition-colors";
+                } else {
+                    img.src = 'FOLDER IMAGES/Gemini_Generated_Image_c85ccec85ccec85c.jpg';
+                    btnBack.className = "bg-black text-white px-6 py-3 rounded-lg font-black uppercase tracking-widest text-xs border-2 border-black transition-colors";
+                    btnFront.className = "bg-white text-black px-6 py-3 rounded-lg font-black uppercase tracking-widest text-xs border-2 border-black hover:bg-gray-100 transition-colors";
+                }
+                
+                img.style.opacity = '1';
+            }, 150);
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.id === 'contact-modal') closeModal('contact-modal');
+            if (e.target.id === 'terms-modal') closeModal('terms-modal');
+            if (e.target.id === 'outlook-modal') {
+                closeModal('outlook-modal');
+                // Optional: Stop the Shakira music if she closes the modal
+                // document.getElementById('bgm-surprise').pause(); 
+            }
+        });
+
+    </script>
+</body>
+</html>
