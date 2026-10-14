@@ -296,6 +296,11 @@
             <div class="bg-brand-blue text-white p-6 text-center z-10 border-b-4 border-black">
                 <h2 class="text-3xl font-marker tracking-widest animate-bounce-slight inline-block drop-shadow-lg">HAPPY BIRTHDAY SA MINA MINA EE! 🎂</h2>
                 <p class="text-xs font-bold uppercase tracking-widest mt-2 text-brand-yellow">Your Official Birthday Trail Fit</p>
+                <div class="mt-4 bg-white/10 py-2 px-4 rounded-lg backdrop-blur-sm border border-white/20 inline-block">
+                    <p class="text-[10px] md:text-xs font-black uppercase tracking-[0.15em] text-white drop-shadow-md">
+                        "HOPEFULLY TIDAK GONJAL GANJUL, DAN BISA DAPET KALUNG PODIUM NEXT RACE YA" 🏅
+                    </p>
+                </div>
             </div>
 
             <!-- Image Viewer -->
@@ -408,7 +413,7 @@
                 errorMsg.classList.remove('hidden');
                 inputField.value = ""; 
                 
-                if (attempts >= 10) {
+                if (attempts >= 5) {
                     clueMsg.classList.remove('hidden');
                     clueMsg.classList.add('fade-in');
                 }
