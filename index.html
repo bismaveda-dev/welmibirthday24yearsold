@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SDA | Mina</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter for UI, Permanent Marker for Hero -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Permanent+Marker&display=swap" rel="stylesheet">
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Canvas Confetti for Birthday Effect -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <script>
@@ -51,14 +47,12 @@
             transition: filter 1.5s ease-in-out;
         }
 
-        /* Paywall Glass Effect */
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
         }
 
-        /* Shake animation for wrong password */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
@@ -68,7 +62,6 @@
             animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
         }
 
-        /* Product image interactions */
         .img-container {
             overflow: hidden;
             display: flex;
@@ -78,30 +71,27 @@
         }
         .img-container img {
             transition: transform 0.4s ease;
-            mix-blend-mode: multiply; /* Removes white background from jpegs */
+            mix-blend-mode: multiply; 
             max-height: 100%;
             max-width: 100%;
             object-fit: contain;
         }
         
-        /* The Selection Glow Effect */
         .selected-glow .img-container {
             outline: 4px solid #fff200;
             box-shadow: 0 0 20px rgba(255, 242, 0, 0.8);
             transform: translateY(-5px);
-            background-color: #fffde6; /* light yellow tint */
+            background-color: #fffde6; 
         }
         .selected-glow img {
             transform: scale(1.05);
         }
 
-        /* Hover effect for unselected items */
         .group:not(.selected-glow):hover .img-container {
             border-color: #000;
             transform: translateY(-3px);
         }
 
-        /* Fade and slide animations */
         .fade-in {
             animation: fadeIn 0.6s ease forwards;
         }
@@ -110,7 +100,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Alexzono aesthetic specific tweaks */
         .highlight-title {
             background-color: #fff200;
             display: inline-block;
@@ -145,7 +134,6 @@
             line-height: 1.2;
         }
 
-        /* Birthday Vibe Animations */
         @keyframes rainbowBorder {
             0% { border-color: #fff200; }
             33% { border-color: #e31837; }
@@ -193,7 +181,7 @@
     </div>
 
     <!-- SEARCH TWIST BANNER -->
-    <div id="search-banner" class="fixed top-0 left-0 w-full bg-brand-yellow z-[60] transform -translate-y-full transition-transform duration-500 shadow-md">
+    <div id="search-banner" class="fixed top-0 left-0 w-full bg-brand-yellow z-[90] transform -translate-y-full transition-transform duration-500 shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <p class="text-black font-black uppercase tracking-widest text-xs md:text-sm text-center w-full">
                 you don't need to search anything, all the answer are within yourself ✨
@@ -205,12 +193,24 @@
     </div>
 
     <!-- WRONG OUTFIT ERROR BANNER -->
-    <div id="error-banner" class="fixed top-0 left-0 w-full bg-accent z-[60] transform -translate-y-full transition-transform duration-500 shadow-md">
+    <div id="error-banner" class="fixed top-0 left-0 w-full bg-accent z-[90] transform -translate-y-full transition-transform duration-500 shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <p class="text-white font-black uppercase tracking-widest text-xs md:text-sm text-center w-full">
                 PLEASE FOR ONCE, CONSIDER MY RECOMMENDATION 😭
             </p>
             <button onclick="closeBanner('error-banner')" class="text-white hover:text-black font-bold ml-4">
+                <i class="ph ph-x text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- EASTEREGG BANNER -->
+    <div id="easteregg-banner" class="fixed top-0 left-0 w-full bg-brand-blue z-[90] transform -translate-y-full transition-transform duration-500 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <p class="text-white font-black uppercase tracking-widest text-xs md:text-sm text-center w-full">
+                YOU CAN TRY TO CLICK ALL THE OTHER BUTTONS BESIDE THE CLOSET, MIGHT SEE SOME EASTEREGGS ✨
+            </p>
+            <button onclick="closeBanner('easteregg-banner')" class="text-white hover:text-brand-yellow font-bold ml-4">
                 <i class="ph ph-x text-lg"></i>
             </button>
         </div>
@@ -237,19 +237,17 @@
 
         <main class="flex-grow w-full flex flex-col items-center pb-10">
             
-            <!-- Hero Banner (Forest) -->
+            <!-- Hero Banner -->
             <div class="w-full h-[30vh] sm:h-[40vh] relative flex items-center justify-center overflow-hidden mb-12">
                 <img src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=2074&auto=format&fit=crop" alt="Forest" class="absolute inset-0 w-full h-full object-cover">
                 <div class="absolute inset-0 bg-white/60 mix-blend-overlay"></div>
                 
-                <!-- Updated Playful Logo Overlay -->
                 <div class="relative z-10 text-center flex flex-col items-center mt-4">
                     <h1 class="font-marker text-4xl md:text-6xl text-brand-blue drop-shadow-md tracking-wider transform -rotate-2">WOYWELMI BIRTHDAY</h1>
                     <h2 class="font-marker text-3xl md:text-5xl text-accent drop-shadow-md tracking-widest mt-0 transform rotate-1">TRAIL CLOSET</h2>
                 </div>
             </div>
 
-            <!-- Virtual Closet Intro -->
             <div class="max-w-2xl text-center px-6 mb-12">
                 <p class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Build Your Outfit</p>
                 <p class="text-xs text-gray-400 font-medium">Click to select one item from each category. Can you guess what I bought you?</p>
@@ -274,7 +272,7 @@
         <footer class="bg-accent text-white py-12 mt-auto w-full">
             <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-6">
                 <div class="flex flex-wrap justify-center gap-8 md:gap-16 text-[10px] font-black uppercase tracking-[0.2em]">
-                    <a href="https://wa.me/6288219598306" target="_blank" class="hover:text-brand-yellow transition-colors">COMPLAINT</a>
+                    <a href="https://wa.me/6288219593806" target="_blank" class="hover:text-brand-yellow transition-colors">COMPLAINT</a>
                     <button onclick="openContactModal()" class="hover:text-brand-yellow transition-colors uppercase font-black tracking-[0.2em]">CONTACT</button>
                     <button onclick="openTermsModal()" class="hover:text-brand-yellow transition-colors uppercase font-black tracking-[0.2em]">TERMS</button>
                 </div>
@@ -305,20 +303,49 @@
 
             <!-- Image Viewer -->
             <div class="flex-grow relative bg-gray-100 flex items-center justify-center overflow-hidden p-4">
-                <img id="outfit-image" src="FOLDER IMAGES/Gemini_Generated_Image_hgs99ahgs99ahgs9.jpg" alt="Outfit Front" class="max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-xl transition-opacity duration-300" onerror="this.src='https://placehold.co/800x1200/f8f9fa/0055a4?text=Front+View+Image'">
+                <img id="outfit-image" src="FOLDER IMAGES/Gemini_Generated_Image_hgs99ahgs99ahgs9.jpg" alt="Outfit Front" class="max-h-[40vh] md:max-h-[50vh] object-contain drop-shadow-xl transition-opacity duration-300" onerror="this.src='https://placehold.co/800x1200/f8f9fa/0055a4?text=Front+View+Image'">
             </div>
 
             <!-- Controls -->
             <div class="bg-white p-6 border-t-2 border-black flex flex-col items-center">
                 <p class="text-sm font-bold text-center mb-4 uppercase tracking-widest">Toggle View</p>
-                <div class="flex gap-4">
+                <div class="flex gap-4 mb-4">
                     <button onclick="switchOutfitView('front')" id="btn-front" class="bg-black text-white px-6 py-3 rounded-lg font-black uppercase tracking-widest text-xs border-2 border-black hover:bg-brand-yellow hover:text-black transition-colors">
                         Front Side
                     </button>
-                    <button onclick="switchOutfitView('back')" id="btn-back" class="bg-white text-black px-6 py-3 rounded-lg font-black uppercase tracking-widest text-xs border-2 border-black hover:bg-brand-yellow transition-colors">
+                    <button onclick="switchOutfitView('back')" id="btn-back" class="bg-white text-black px-6 py-3 rounded-lg font-black uppercase tracking-widest text-xs border-2 border-black hover:bg-gray-100 transition-colors">
                         Back Side
                     </button>
                 </div>
+                <!-- Read Letter Button -->
+                <button onclick="openLetterModal()" class="w-full md:w-auto bg-accent text-white px-8 py-4 rounded-xl font-black uppercase tracking-[0.15em] text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all border-2 border-black mt-2">
+                    Read The Personal Letter 💌
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LETTER MODAL -->
+    <div id="letter-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity duration-300 opacity-0">
+        <div class="bg-[#fdfbf7] border-2 border-black rounded-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300 relative p-6 md:p-10 font-sans">
+            <button onclick="closeModal('letter-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+                <i class="ph ph-x text-2xl font-bold"></i>
+            </button>
+            
+            <h2 class="font-marker text-3xl mb-6 text-brand-blue">To: Welmi terkesayangan</h2>
+            
+            <div class="space-y-4 text-sm md:text-base text-gray-800 leading-relaxed font-medium">
+                <p>Hiiiiiiiiiii, happyy birthdayy welmi. I know we are on a not-so good-circumtances lately, and a greater-disaster mode of long distance shit that has been happening for these past 4 weeks. But birthday is birthday, and by how you appreciate my birthday, I also think you really treat a birthday as a very intimate and special event to you. So here are little things that I can do, just to replace my absence in the side of your mid-night birthday and the run :).</p>
+                
+                <p>You and me know, i'm really bad at writing, I might be good at copywriting, but a shitty at open up my feeling with words. But even with that shitty words, you still can get it right, all the times. It's not because i'm easy to read, or just being a generic classic-gen z male that try to be romantic persay, but most of it is due to your sincerity towards any people you are with. And it's your stregth that I fall in love with. Good with people also the other one that I love, also the bj, and cowgirl, and you named all of it xD.</p>
+                
+                <p>I believe this year might seem very hard, with all the "far away from people, and live a-new life" situation. But with all your stregths, WE all believe you're in a noworry situation, and you got this (WE as me, and dazai, chuuya, and the rest of your friends that i cannot mention, because TERLALU SEDIKIT, alias)</p>
+                
+                <p>As your so-called PACAR (u need to remember this asshole), I'm an open room for you to tell everything that you cannot tell to anyone, i mean it literally, including how you felt about your day, and mine. But the key for that, is communicate. You too scare to ask for help or talk to anyone, that you think it is better for you to do it all alone. Probably that "independent girl" idea that raising from your heart and mind taking over all of your body just like how chuuya unleash his corruption mode, and i will be the "no longer human" to you for that to be controll (gua lagi aje ranger merahnya). But, back again, please communicate.</p>
+                
+                <p>I'm not asking for anything more than that, WE are not asking anything far than that. Hopefully with this 24 years-your-age, can give you all the things you need to be happier, stronger, and richer (amen).</p>
+                
+                <p class="font-bold mt-8">Love you, our fate will not end in a place like this. Because you and I are destined to-- Bisma</p>
             </div>
         </div>
     </div>
@@ -491,7 +518,7 @@
             'vest': null
         };
 
-        // --- WARDROBE DATA ---
+        // --- STREAMING_CHUNK:Loading Wardrobe Data... ---
         const wardrobeData = [
             {
                 categoryId: "joggers",
@@ -660,7 +687,7 @@
             }
         }
 
-        // --- VALIDATION & OUTLOOK LOGIC ---
+        // --- STREAMING_CHUNK:Adding Outlook Validation & Music Handling... ---
         function checkOutlook() {
             const correctAnswers = {
                 'joggers': 'jog-1',
@@ -703,9 +730,29 @@
                 
                 // Trigger the confetti!
                 fireConfetti();
+
+                // Drop down the Easter Egg banner after 3 seconds
+                setTimeout(() => {
+                    triggerBanner('easteregg-banner');
+                }, 3000);
+
             } else {
                 triggerBanner('error-banner');
             }
+        }
+
+        // --- NEW FEATURE: OPEN LETTER MODAL & SWITCH MUSIC ---
+        function openLetterModal() {
+            // Switch music back to Luck Life
+            const bgmDefault = document.getElementById('bgm-default');
+            const bgmSurprise = document.getElementById('bgm-surprise');
+            
+            bgmSurprise.pause(); 
+            bgmDefault.volume = 0.5;
+            bgmDefault.play().catch(e => console.log("Audio play prevented.")); 
+
+            // Open the letter popup
+            openModalById('letter-modal');
         }
 
         // --- CONFETTI LOGIC ---
@@ -763,10 +810,9 @@
         window.addEventListener('click', function(e) {
             if (e.target.id === 'contact-modal') closeModal('contact-modal');
             if (e.target.id === 'terms-modal') closeModal('terms-modal');
+            if (e.target.id === 'letter-modal') closeModal('letter-modal');
             if (e.target.id === 'outlook-modal') {
                 closeModal('outlook-modal');
-                // Optional: Stop the Shakira music if she closes the modal
-                // document.getElementById('bgm-surprise').pause(); 
             }
         });
 
